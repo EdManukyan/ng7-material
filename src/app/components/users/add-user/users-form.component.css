@@ -1,9 +1,13 @@
 .mat-form-field {
-    font-size: 14px;
     width: 100%;
 }
 
 .btn-holder {
     display: flex;
     justify-content: flex-end;
+}
+
+.user-form-header {
+    display: flex;
+    justify-content: space-between;
 }

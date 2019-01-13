@@ -1,0 +1,31 @@
+.mat-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+.btn-holder {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.actions-container {
+    display: flex;
+}
+
+mat-row {
+    cursor: pointer;
+}
+
+.actions-container .fas {
+    font-size: 18px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.actions-container .fas.fa-edit {
+    color: #1E88E5;
+}
+
+.actions-container .fas.fa-trash-alt {
+    color: #F4511E;
+}

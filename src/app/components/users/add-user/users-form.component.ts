@@ -1,51 +1,67 @@
 import {Component, OnInit} from '@angular/core';
-import {MatTableDataSource} from '@angular/material';
-import {ActivatedRoute, Router} from '@angular/router';
-import {UsersService} from '../../common/services/users.service';
-import {filter} from 'rxjs/operators';
-
-export interface PeriodicElement {
-    id: number;
-    first_name: string;
-    last_name: string;
-    avatar: string;
-}
-
-let ELEMENT_DATA;
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UsersService} from '../../../common/services/users.service';
+import {AngularFirestore} from '@angular/fire/firestore';
 
 @Component({
-    selector: 'users',
-    templateUrl: './users.component.html',
-    styleUrls: ['./users.component.css']
+    selector: 'users-form',
+    templateUrl: './users-form.component.html',
+    styleUrls: ['./users-form.component.css']
 })
-export class UsersComponent implements OnInit {
 
-    public displayedColumns: string[] = ['id', 'first_name', 'last_name', 'avatar'];
-    public dataSource;
+export class UsersFormComponent implements OnInit {
+    public userForm: FormGroup;
+    public userIsRegistered = false;
 
     constructor(
-        private _usersService: UsersService,
+        private _fb: FormBuilder,
+        private _userService: UsersService,
+        private _fireStore: AngularFirestore,
     ) {
 
     }
 
     ngOnInit() {
-        this.usersList();
+
+        const urlPattern = '^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$';
+
+        this.userForm = this._fb.group({
+            first_name: [void 0, [Validators.required, Validators.minLength(2)]],
+            last_name: [void 0, [Validators.required]],
+            email: [void 0, [Validators.required, Validators.email]],
+            avatar: [void 0, [Validators.required, Validators.pattern(urlPattern)]],
+        });
     }
 
-    public applyFilter(filterValue: string) {
-        this.dataSource.filter = filterValue.trim().toLowerCase();
+    /**
+     * Convenience getter for easy access to form fields
+     */
+    get userFormControls() {
+        return this.userForm.controls;
     }
 
-    private usersList () {
-        this._usersService.requestForUsersList()
-            .pipe(
-                filter(data => !!data)
-            )
-            .subscribe((data: PeriodicElement) => {
-                ELEMENT_DATA = data;
-                this.dataSource = new MatTableDataSource(ELEMENT_DATA.data);
-            });
+    /**
+     * Checking if form value is not invalid.
+     * Adding data to firestore.
+     */
+    public addUser() {
+        if (!this.userForm.invalid) {
+            const userData = this.userForm.value;
+            this._fireStore.collection('users').add(userData);
+            this.userIsRegistered = !this.userIsRegistered;
+
+            this.resetUsersForm();
+
+            setTimeout(() => {
+                this.userIsRegistered = !this.userIsRegistered;
+            }, 1500);
+        }
     }
 
+    /**
+     * Resetting form.
+     */
+    public resetUsersForm() {
+        this.userForm.reset({id: void 0, first_name: void 0, last_name: void 0, avatar: void 0});
+    }
 }

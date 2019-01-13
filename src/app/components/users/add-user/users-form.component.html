@@ -1,61 +1,37 @@
 <mat-card>
-    <mat-card-header>
-        <div mat-card-avatar class="example-header-image"></div>
+    <mat-card-header class="user-form-header">
         <mat-card-title>Add User</mat-card-title>
+
+        <div class="success-message" *ngIf="userIsRegistered">User is added</div>
+
     </mat-card-header>
     <mat-card-content>
-        <mat-form-field>
-            <input matInput placeholder="ID">
-        </mat-form-field>
-        <mat-form-field>
-            <input matInput placeholder="First Name">
-        </mat-form-field>
-        <mat-form-field>
-            <input matInput placeholder="Last Name">
-        </mat-form-field>
-        <mat-form-field>
-            <input matInput placeholder="Avatar">
-        </mat-form-field>
-        <div class="btn-holder">
-            <button [disabled]="false" mat-raised-button color="primary">Add</button>
-        </div>
+        <form [formGroup]="userForm" autocomplete="off">
+            <mat-form-field>
+                <input formControlName="first_name" matInput placeholder="First Name*">
+            </mat-form-field>
+            <mat-form-field>
+                <input formControlName="last_name" matInput placeholder="Last Name*">
+            </mat-form-field>
+            <mat-form-field>
+                <input formControlName="email" matInput placeholder="Email*">
+            </mat-form-field>
+            <mat-form-field>
+                <input formControlName="avatar" matInput placeholder="Avatar*">
+                <div *ngIf="userFormControls.avatar.touched && userFormControls.avatar.invalid" class="error-message">
+                    URL should be provided!
+                </div>
+            </mat-form-field>
+            <div class="btn-holder">
+                <button class="mr-10" (click)="resetUsersForm()" [disabled]="userForm.untouched" mat-raised-button color="warn">
+                    Reset
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+                <button (click)="addUser()" [disabled]="userForm.invalid" mat-raised-button color="primary">
+                    Save
+                    <i class="far fa-save"></i>
+                </button>
+            </div>
+        </form>
     </mat-card-content>
 </mat-card>
-
-<mat-divider></mat-divider>
-
-<mat-form-field>
-  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
-</mat-form-field>
-
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-  <!-- Position Column -->
-  <ng-container matColumnDef="id">
-    <th mat-header-cell *matHeaderCellDef> No. </th>
-    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-  </ng-container>
-
-  <!-- Name Column -->
-  <ng-container matColumnDef="first_name">
-    <th mat-header-cell *matHeaderCellDef> First Name </th>
-    <td mat-cell *matCellDef="let element"> {{element.first_name}} </td>
-  </ng-container>
-
-  <!-- Weight Column -->
-  <ng-container matColumnDef="last_name">
-    <th mat-header-cell *matHeaderCellDef> Last Name </th>
-    <td mat-cell *matCellDef="let element"> {{element.last_name}} </td>
-  </ng-container>
-
-  <!-- Symbol Column -->
-  <ng-container matColumnDef="avatar">
-    <th mat-header-cell *matHeaderCellDef> Avatar </th>
-    <td mat-cell *matCellDef="let element">
-        <img src="{{element.avatar}}" alt="avatar" width="50px">
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
