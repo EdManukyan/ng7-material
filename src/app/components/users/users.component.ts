@@ -1,9 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {UsersService} from '../../common/services/users.service';
-import {filter} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 import {UsersModel} from '../../common/models/users.model';
 import {MatTableDataSource} from '@angular/material';
 import {AngularFirestore} from '@angular/fire/firestore';
+import {Subscription} from 'rxjs';
 
 
 @Component({
@@ -12,11 +13,12 @@ import {AngularFirestore} from '@angular/fire/firestore';
     styleUrls: ['./users.component.css']
 })
 
-export class UsersComponent implements OnInit {
-    public activeRoute = 'Users';
+export class UsersComponent implements OnInit, OnDestroy {
     public displayedColumns: string[] = ['first_name', 'last_name', 'email', 'avatar', 'action'];
     public dataSource;
     public usersData: UsersModel[];
+
+    private _usersListSubscription: Subscription;
 
     constructor(
         private _usersService: UsersService,
@@ -31,7 +33,7 @@ export class UsersComponent implements OnInit {
 
     /**
      * Filtering gird data with inserted value
-     * @param filterValue
+     * @param filterValue: string
      */
     public applyFilter(filterValue: string) {
         this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -39,14 +41,14 @@ export class UsersComponent implements OnInit {
 
     /**
      * @todo Implement user data edit functionality
-     * @param data
+     * @param data: UsersModel
      */
     public editUser(data: UsersModel) {
     }
 
     /**
      * Handling delete request with the given id
-     * @param id
+     * @param id: string
      */
     public deleteUser(id: string) {
         this._fireStore.doc('users/' + id).delete();
@@ -56,7 +58,7 @@ export class UsersComponent implements OnInit {
      * Getting users list from users service
      */
     private usersList() {
-        this._usersService.getUsersList()
+        this._usersListSubscription = this._usersService.getUsersList()
             .pipe(filter(data => !!data))
             .subscribe(data => {
 
@@ -69,5 +71,9 @@ export class UsersComponent implements OnInit {
 
                 this.dataSource = new MatTableDataSource(this.usersData);
             });
+    }
+
+    ngOnDestroy(): void {
+        this._usersListSubscription.unsubscribe();
     }
 }
